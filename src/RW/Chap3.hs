@@ -54,4 +54,41 @@ lSortBy f xs =
     lt = filter (\x-> (f x) < p') xs
     gt = filter (\x-> (f x) > p') xs
 
+lIntersperce :: a -> [[a]] -> [a]
+lIntersperce sep (l:[]) = l
+lIntersperce sep (l:ls) = l ++ [sep] ++ (lIntersperce sep ls)
 
+data Tree a = Empty | Node a (Tree a) (Tree a)
+
+simpleTree = Node 1 (Node 2 (Node 1 Empty Empty) Empty) Empty
+
+treeHeight :: Tree a -> Int
+treeHeight Empty = 0
+treeHeight (Node _ l r) = 1 + (max (treeHeight l) (treeHeight r))
+
+data Direction = DLeft | DRight | DStraight 
+type Point = (Double, Double)
+
+-- I suspect this is wrong once we pass through 90 degrees
+findBend :: Point -> Point -> Point -> Direction
+findBend a b c = 
+  case vProd a b c of
+    x
+      | 0     -> DStraight
+      | x < 0 -> DRight
+      | x > 0 -> DLeft
+  where
+    vProd (x,y) (x', y') (x'', y'') =
+      (x' - x)*(y'' - y) - (y' - y)*(x'' - x)
+
+findBends :: [Point] -> [Direction]
+findBends (a:b:[]) = []
+findBends (a:b:c:xs) = 
+  (findBend a b c) : findBends (b:c:xs)
+
+type Hull = [Point]
+convexHull :: [Point] -> Hull
+convexHull xs = 
+  where
+    sorted = lSortBy (snd) xs
+    
