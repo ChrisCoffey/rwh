@@ -1,7 +1,14 @@
 module RW.Chap3 (
   len,
   lSum,
-  lMean
+  lMean,
+  palindromize,
+  isPalindrome,
+  lSortBy,
+  lIntersperce,
+  treeHeight,
+  findBend, 
+  findBends
 ) where
 
 
@@ -74,9 +81,9 @@ findBend :: Point -> Point -> Point -> Direction
 findBend a b c = 
   case vProd a b c of
     x
-      | 0     -> DStraight
-      | x < 0 -> DRight
-      | x > 0 -> DLeft
+      | x == 0  -> DStraight
+      | x < 0   -> DRight
+      | x > 0   -> DLeft
   where
     vProd (x,y) (x', y') (x'', y'') =
       (x' - x)*(y'' - y) - (y' - y)*(x'' - x)
@@ -86,9 +93,10 @@ findBends (a:b:[]) = []
 findBends (a:b:c:xs) = 
   (findBend a b c) : findBends (b:c:xs)
 
+-- todo Monday night
 type Hull = [Point]
-convexHull :: [Point] -> Hull
-convexHull xs = 
-  where
-    sorted = lSortBy (snd) xs
+--convexHull :: [Point] -> Hull
+--convexHull xs = 
+ -- where
+  --  sorted = lSortBy (snd) xs
     
