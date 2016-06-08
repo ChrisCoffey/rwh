@@ -8,6 +8,9 @@ module RW.Chap4 (
   transpose
 ) where
 
+import Data.Functor
+import Data.Char 
+
 safeHead :: [a] -> Maybe a
 safeHead []     = Nothing
 safeHead (x:_)  = Just x
@@ -57,3 +60,37 @@ transpose ls
     where 
       pTail Nothing = []
       pTail (Just t) = t
+
+asInt :: [Char] -> Maybe Int
+asInt ('-':rest) = (\x-> -x) <$> (asInt rest)
+asInt xs = foldl step (Just 0) xs
+  where 
+    step Nothing _ = Nothing
+    step (Just n) c
+      | isDigit c = Just (n *10 + (digitToInt c))
+      | otherwise = Nothing
+
+foldCat :: [[a]]-> [a]
+foldCat = foldr prep []
+  where 
+    prep [] acc = acc
+    prep (x:xs) acc = x:(prep xs acc)
+
+fTakeWhile :: (a -> Bool) -> [a] -> [a]
+fTakeWhile p = foldr pull []
+  where 
+    pull a acc
+      | p a = a:acc
+      | otherwise = []
+
+fGroupBy :: (a -> a -> Bool) -> [a] -> [[a]]
+fGroupBy p = foldr doGroup []
+  where 
+    doGroup a (h@(x:xs):t)
+      | p x a = (a:h):t
+      | otherwise = [a]:h:t
+    doGroup a acc = [a]:acc
+
+fAny :: (a -> Bool) -> [a] -> Bool
+fAny p = foldr (\a b-> b || p a) False
+
