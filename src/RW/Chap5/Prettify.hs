@@ -159,11 +159,11 @@ fill width x =
   where lp col (d:ds) dq = 
           case d of
             Empty           -> lp col ds dq
-            Char _          -> lp (col + 1) ds (d:dq)
+            Char c          -> lp (col + 1) ds (d:dq)
             Text s          -> lp (col + length s) ds (d:dq)
             Line
               | col < width -> lp width (d:ds) ((Text spaces):d:dq)
-              | otherwise   -> ((hcat . reverse $ dq)) <> lp 0 ds []
+              | otherwise   -> ((hcat . reverse $ dq)) </> lp 0 ds []
             a `Concat` b    -> lp col (a:b:ds) dq
             a `Union` b     -> nicest col (lp col (a:ds) dq) (lp col (b:ds) dq)
             where 
@@ -176,4 +176,5 @@ fill width x =
             least = min width col
 
 
-    
+-- To extend this to actually support nesting, I'll need to track the columns where each opening character occurs
+--  This can be done with another where function
