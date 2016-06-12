@@ -1,6 +1,5 @@
-module RW.Chap5.Prettify (
-  Doc
-) where
+module RW.Chap5.Prettify 
+ where
 
 import Data.Bits    (shiftR, (.&.))
 import Data.Char    (ord)
@@ -115,4 +114,66 @@ compact d = transform [d]
             a `Concat` b    -> transform (a:b:xs)
             _ `Union` b     -> transform (b:xs)
 
+pretty :: Int -> Doc -> String
+pretty width x = 
+  best 0 [x]
+  where best col (d:ds) = 
+          case d of 
+            Empty         -> best col ds
+            Char c        -> c : best (col + 1) ds
+            Text s        -> s ++ best (col + length s) ds
+            Line          -> '\n' : best 0 ds
+            a `Concat` b  -> best col (a:b:ds)
+            a `Union` b   -> nicest col (best col (a:ds)) (best col (b:ds))
+        
+        best _ _ = ""
 
+        nicest col a b 
+          | (width - least) `fits` a = a
+          | otherwise                = b
+          where least = min width col
+
+fits :: Int -> String -> Bool
+w `fits` _ | w < 0  = False
+w `fits` ""         = True
+w `fits` ('\n':_)     = True
+w `fits` (_:cs)     = (w -1) `fits` cs
+
+
+fitsD :: Int -> Doc -> Bool
+w `fitsD` _ | w < 0  = False
+w `fitsD` d = 
+  case d of
+    Empty         -> True
+    Line          -> True
+    Char _        -> w > 1
+    Text s        -> (length s) < w
+    a `Concat` b  -> w `fitsD` a && w `fitsD` b
+    a `Union` b   -> w `fitsD` a || w `fitsD` b
+
+-- Fill should accept a number, and if a line break occurs before the document reaches
+-- that width, left padd the line with n spaces
+fill :: Int -> Doc -> Doc
+fill width x =
+  lp 0 [x] []
+  where lp col (d:ds) dq = 
+          case d of
+            Empty           -> lp col ds dq
+            Char _          -> lp (col + 1) ds (d:dq)
+            Text s          -> lp (col + length s) ds (d:dq)
+            Line
+              | col < width -> lp width (d:ds) ((Text spaces):d:dq)
+              | otherwise   -> ((hcat . reverse $ dq)) <> lp 0 ds []
+            a `Concat` b    -> lp col (a:b:ds) dq
+            a `Union` b     -> nicest col (lp col (a:ds) dq) (lp col (b:ds) dq)
+            where 
+              spaces = take (width - col) . repeat $ ' '
+        lp _ _ q = hcat . reverse $ q
+        nicest col a b
+          | (width - least) `fitsD` a  = a
+          | otherwise                 = b
+          where 
+            least = min width col
+
+
+    
