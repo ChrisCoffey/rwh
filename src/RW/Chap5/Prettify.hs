@@ -178,3 +178,21 @@ fill width x =
 
 -- To extend this to actually support nesting, I'll need to track the columns where each opening character occurs
 --  This can be done with another where function
+nudge :: Int -> Doc -> Doc
+nudge width x = 
+  f 0 [x] []
+  where f indent (d:ds) dq = 
+          case d of
+            Empty               -> f indent ds dq
+            Char c 
+              | isOpening c     -> f (indent + width)  (Line:ds) (d:dq)
+              | isClosing c     -> f (indent - width)  (Line:ds) (d:dq)
+              | otherwise       -> f indent ds (d:dq)
+            Text s              -> f indent ds (d:dq)
+            Line                -> (hcat . reverse $ dq) </> (Text spaces) <> f indent ds []
+            a `Concat` b        -> f indent (a:b:ds) dq
+            a `Union` _         -> f indent (a:ds) dq
+          where spaces = replicate indent ' '
+        f _ _ q = hcat . reverse $ q
+        isOpening c = c == '[' || c == '{' || c == '(' 
+        isClosing c = c == ']' || c == '}' || c == ')' 
