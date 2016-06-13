@@ -15,7 +15,10 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     RW.Chap3
+  exposed-modules:     RW.Chap3,
+                       RW.Chap4,
+                       RW.Chap5.SimpleJSON,
+                       RW.Chap6.JSONClass
   build-depends:       base >= 4.7 && < 5
   default-language:    Haskell2010
 

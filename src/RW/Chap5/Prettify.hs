@@ -52,7 +52,7 @@ oneChar c = case lookup c simpleEscapes of
             Just r -> text r
             Nothing | mustEscape c -> hexEscape c
                     | otherwise    -> char c
-  where mustEscape c = c < ' ' || c == '\x7f' || c > '\xff'
+  where mustEscape x = x < ' ' || x == '\x7f' || x > '\xff'
 
 simpleEscapes :: [(Char, String)]
 simpleEscapes = zipWith ch "\b\n\f\r\t\\\"/" "bnfrt\\\"/"
@@ -98,8 +98,8 @@ flatten (a `Union` _)   = flatten a
 flatten x               = x
 
 punctuate :: Doc -> [Doc] -> [Doc]
-punctuate p []  = []
-punctuate p [d] = [d]
+punctuate _ []  = []
+punctuate _ [d] = [d]
 punctuate p (d:ds) = (d <> p): punctuate p ds
 
 compact :: Doc -> String
@@ -135,8 +135,8 @@ pretty width x =
 
 fits :: Int -> String -> Bool
 w `fits` _ | w < 0  = False
-w `fits` ""         = True
-w `fits` ('\n':_)     = True
+_ `fits` ""         = True
+_ `fits` ('\n':_)     = True
 w `fits` (_:cs)     = (w -1) `fits` cs
 
 
@@ -159,7 +159,7 @@ fill width x =
   where lp col (d:ds) dq = 
           case d of
             Empty           -> lp col ds dq
-            Char c          -> lp (col + 1) ds (d:dq)
+            Char _          -> lp (col + 1) ds (d:dq)
             Text s          -> lp (col + length s) ds (d:dq)
             Line
               | col < width -> lp width (d:ds) ((Text spaces):d:dq)
